@@ -1,6 +1,11 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 import pandas as pd
+from django.http import JsonResponse
+import joblib , pickle
+import os
+
+
 
 # Define doctor ID and patient ID
 DOCTOR_ID = '1234'
@@ -45,3 +50,65 @@ def login(request):
     else:
         # Handle other HTTP methods
         return Response({'error': 'Method not allowed'}, status=405)
+
+
+
+# # Assuming the trained model file is named trained_model.pkl and is inside the csv folder
+# trained_model_path = os.path.join(os.path.dirname(__file__), 'csv', 'trained_model.pkl')
+
+# def predict_view(request):
+#     # Load the trained model
+#     model = joblib.load(trained_model_path)
+
+#     # Get input data from the request
+#     input_data = request.POST.get('input_data')
+
+#     # Perform prediction using the loaded model
+#     prediction = model.predict([input_data])
+
+#     # Return the prediction as a JSON response
+#     return JsonResponse({'prediction': prediction})
+    
+
+
+import os
+import pickle
+import json
+import numpy as np
+from django.http import JsonResponse
+
+def check_data_view(request):
+    try:
+        # Define the path to the trained model pickle file
+        trained_model_path = os.path.join(os.path.dirname(__file__), 'csv', 'trained_model1.pkl')
+        
+        # Check if the pickle file exists
+        if os.path.exists(trained_model_path):
+            # Load the trained model
+            with open(trained_model_path, 'rb') as f:
+                loaded_data = pickle.load(f)
+            
+            # Serialize the loaded data
+            serialized_data = json.dumps(loaded_data, default=lambda x: x.tolist() if isinstance(x, np.ndarray) else x)
+            
+            # Return a success response with the serialized data
+            return JsonResponse({'status': 'success', 'message': 'Data loaded successfully', 'loaded_data': serialized_data})
+        else:
+            # Return an error response if the file does not exist
+            return JsonResponse({'status': 'error', 'message': f'Trained model file not found at {trained_model_path}'}, status=404)
+    except Exception as e:
+        # Return an error response if an exception occurs
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+
+from django.views.generic import View
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
+
+class GetCSRFTokenView(View):
+    def get(self, request, *args, **kwargs):
+        csrf_token = get_token(request)
+        return JsonResponse({'csrfToken': csrf_token})
+    
+
+

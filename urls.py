@@ -16,9 +16,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import login, process_excel
+from .views import login , check_data_view , GetCSRFTokenView
 
 urlpatterns = [
     path('login/', login, name='login'),
-    path('process_excel/', process_excel, name='process_excel'),
+    # path('predict/', predict_view, name='predict'),
+   path('check-data/', check_data_view, name='check_data'),
+   path('api/get-csrf-token/', GetCSRFTokenView.as_view(), name='get_csrf_token'),
+   
+
+    
 ]
